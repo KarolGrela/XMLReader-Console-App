@@ -36,6 +36,8 @@ namespace XMLReader_Console_App
         /// <param name="segment"> segment that will be added to the lsit </param>
         public void AddSegment(Segment segment)
         {
+            Segment s1 = new Segment();
+            s1 = segment;
             Segments.Add(segment);
         }
         /// <summary>
