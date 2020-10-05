@@ -257,19 +257,16 @@ namespace XMLReader_Console_App
                 {
                     Sp sp = new Sp();   // variable storing data from currently read Sp
 
+                    bool run_while = true;      // variable stopping while loop 
+
                     // loop reading one sp
-                    while (xmlFile.Read())
+                    while (run_while)
                     {
-                        /*
-                        if(xmlFile.NodeType == XmlNodeType.Element)
+                        xmlFile.Read();
+                        if (xmlFile.NodeType == XmlNodeType.Element)
                         {
-                            Console.WriteLine(xmlFile.NodeType.ToString() + ", " + xmlFile.Name + ", " + xmlFile.ReadElementContentAsString());
-                            //if (xmlFile.Name == "x") sp.X = xmlFile.ReadElementContentAsString();
-                        }
-                        
-                        
                             // reading data
-                            if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "x") { sp.X = content; } //sp.X = xmlFile.ReadElementContentAsString();
+                            if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "x") { sp.X = xmlFile.ReadElementContentAsString(); } //sp.X = xmlFile.ReadElementContentAsString();
                             if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "y") { } //sp.Y = xmlFile.ReadElementContentAsString();
                             if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "s") { } //sp.S = xmlFile.ReadElementContentAsString();
                             if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "t") { } //sp.T = xmlFile.ReadElementContentAsString();
@@ -277,18 +274,27 @@ namespace XMLReader_Console_App
                             if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "strict_actuator") { } //sp.Strict_actuator = xmlFile.ReadElementContentAsString();
                             if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "p1") { } //sp.P1 = xmlFile.ReadElementContentAsString();
                             if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "p2") { } //sp.P2 = xmlFile.ReadElementContentAsString();
+                        }
                         // adding sp to the list and breaking the loop up -> sp finished
-                        */
                         
 
-                        if (xmlFile.NodeType == XmlNodeType.EndElement && xmlFile.Name == "sp") 
-                        { s1.pts.Add(sp); break; }
+                        //Console.WriteLine(xmlFile.NodeType + ", " + xmlFile.Name);
+
+                        if (xmlFile.NodeType == XmlNodeType.EndElement && xmlFile.Name == "segment") 
+                        { 
+                            s1.pts.Add(sp);
+                            run_while = false; 
+                        }
                     }
                 }
                 
                 // adding segment to the list and breaking the loop up -> segment finished
                 if (xmlFile.NodeType == XmlNodeType.EndElement && xmlFile.Name == "segment") 
-                { segmentData.AddSegment(s1); break;}
+                {
+                    Console.WriteLine("Break dem loops");
+                    segmentData.AddSegment(s1); 
+                    break;
+                }
             }
         }
 
