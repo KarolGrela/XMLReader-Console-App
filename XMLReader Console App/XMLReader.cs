@@ -45,6 +45,7 @@ namespace XMLReader_Console_App
         public SymbolicPointGroups symbolicPointGroups;
         public SymbolicPoints symbolicPoints;
         public Zones zones;
+
         #endregion
 
         #region Constructor
@@ -68,6 +69,9 @@ namespace XMLReader_Console_App
             b_symbolic_points = false;
             b_symbolic_point_groups = false;
             b_zones = false;
+
+
+
     }
         #endregion
 
@@ -117,7 +121,7 @@ namespace XMLReader_Console_App
 
             }
 
-            Console.WriteLine(fileInfo.DisplayData());
+
 
             return true;
         }
@@ -168,6 +172,7 @@ namespace XMLReader_Console_App
         private void metFileInfo(XmlNodeType type, string name)             
         {
             // saving data from file to variables
+            // if xmlFile is of type "Element" and of proper name, then:
             if (type == XmlNodeType.Element && name == "version") fileInfo.Version = xmlFile.ReadElementContentAsString();
             else if (type == XmlNodeType.Element && name == "production_area") fileInfo.Production_area = xmlFile.ReadElementContentAsString();
             else if (type == XmlNodeType.Element && name == "machine_type") fileInfo.Machine_type = xmlFile.ReadElementContentAsString();
@@ -182,29 +187,109 @@ namespace XMLReader_Console_App
         }
 
         // reads segment_data section
-        // every cycle of this loop reads one segment
+        // every call of this method reads one segment
         private void metSegmentData(XmlNodeType type, string name)
         {
-            Segment s1 = new Segment();
-                
-            ////// NIE DZIAŁA!!!!
-                // loop going through whole segment
-                while(true){
-                    xmlFile.Read(); // reading next line
-                    if (xmlFile.NodeType == XmlNodeType.EndElement && xmlFile.ReadElementContentAsString() == "segment") break; // break loop if end of segment has been acheved
+            Segment s1 = new Segment();     // variable storing data from currently read segment
 
-                    // if end of segment hasn't been yet achieved, save values to instance
+            /*
+             * Segment is devided to 5 data sets:
+             * 1. segment data - 6 private strings
+             * 2. pts - a list of instances of SP class
+             * 3. start_links - list of strings
+             * 4. end_links - list of strings
+             * 5. seg_overlap - list of instances of seg class
+             * In order for loop to function correctly boolean variables, determining type of currently read data, are needed:
+             */
+            bool segment_data = false;      // currently reading segment_data etc.
+            bool pts = false;
+            bool start_links = false;
+            bool end_links = false;
+            bool seg_overlap = false;
 
-                    //saving data of segment, unbounded by other classes/structures/lists
-                    if (xmlFile.ReadElementContentAsString() == "id") s1.Id = xmlFile.ReadElementContentAsString();
-                    if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.ReadElementContentAsString() == "status") s1.Status = xmlFile.ReadElementContentAsString();
-                    if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.ReadElementContentAsString() == "level") s1.Level = xmlFile.ReadElementContentAsString();
-                    if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.ReadElementContentAsString() == "wait_area") s1.Wait_area = xmlFile.ReadElementContentAsString();
-                    if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.ReadElementContentAsString() == "pivot_start") s1.Pivot_start = xmlFile.ReadElementContentAsString();
-                    if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.ReadElementContentAsString() == "pivot_end") s1.Pivot_end = xmlFile.ReadElementContentAsString();
+            
+
+            // loop reading one segment
+            while (xmlFile.Read())
+            {
+                // setting/resetting of boolean variables
+                if (((pts || start_links || end_links || seg_overlap) == false) && xmlFile.Name == "id")  // set segment_data
+                {
+                    segment_data = true;
+                }
+                else if (segment_data && xmlFile.Name == "pts")                                              // reset segment data / set pts
+                {
+                    segment_data = false;
+                    pts = true;
+                }
+                else if (pts && xmlFile.Name == "start_links")                                               // reset pts / set start_links
+                {
+                    pts = false;
+                    start_links = true;
+                }
+                else if (start_links && xmlFile.Name == "end_links")                                         // reset start_links / set end_links
+                {
+                    start_links = false;
+                    end_links = true;
+                }
+                else if (end_links && xmlFile.Name == "seg_overlap")                                         // reset end_links / set seg_overlap
+                {
+                    end_links = false;
+                    seg_overlap = true;
+                }
+                else if (seg_overlap && xmlFile.NodeType == XmlNodeType.EndElement && xmlFile.Name == "seg_overlap")     // reset seg_overlap
+                {
+                    seg_overlap = false;
                 }
 
-            segmentData.AddSegment(s1);
+                // Saving data to the structure
+                if (segment_data)
+                {
+                    // reading data
+                    if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "id") s1.Id = xmlFile.ReadElementContentAsString();
+                    if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "status") s1.Status = xmlFile.ReadElementContentAsString();
+                    if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "level") s1.Level = xmlFile.ReadElementContentAsString();
+                    if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "wait_area") s1.Wait_area = xmlFile.ReadElementContentAsString();
+                    if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "pivot_start") s1.Pivot_start = xmlFile.ReadElementContentAsString();
+                    if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "pivot_end") s1.Pivot_end = xmlFile.ReadElementContentAsString();
+                }               
+                else if (pts)
+                {
+                    Sp sp = new Sp();   // variable storing data from currently read Sp
+
+                    // loop reading one sp
+                    while (xmlFile.Read())
+                    {
+                        /*
+                        if(xmlFile.NodeType == XmlNodeType.Element)
+                        {
+                            Console.WriteLine(xmlFile.NodeType.ToString() + ", " + xmlFile.Name + ", " + xmlFile.ReadElementContentAsString());
+                            //if (xmlFile.Name == "x") sp.X = xmlFile.ReadElementContentAsString();
+                        }
+                        
+                        
+                            // reading data
+                            if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "x") { sp.X = content; } //sp.X = xmlFile.ReadElementContentAsString();
+                            if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "y") { } //sp.Y = xmlFile.ReadElementContentAsString();
+                            if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "s") { } //sp.S = xmlFile.ReadElementContentAsString();
+                            if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "t") { } //sp.T = xmlFile.ReadElementContentAsString();
+                            if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "actuator") { } //sp.Actuator = xmlFile.ReadElementContentAsString();
+                            if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "strict_actuator") { } //sp.Strict_actuator = xmlFile.ReadElementContentAsString();
+                            if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "p1") { } //sp.P1 = xmlFile.ReadElementContentAsString();
+                            if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "p2") { } //sp.P2 = xmlFile.ReadElementContentAsString();
+                        // adding sp to the list and breaking the loop up -> sp finished
+                        */
+                        
+
+                        if (xmlFile.NodeType == XmlNodeType.EndElement && xmlFile.Name == "sp") 
+                        { s1.pts.Add(sp); break; }
+                    }
+                }
+                
+                // adding segment to the list and breaking the loop up -> segment finished
+                if (xmlFile.NodeType == XmlNodeType.EndElement && xmlFile.Name == "segment") 
+                { segmentData.AddSegment(s1); break;}
+            }
         }
 
         private void metPosinit_point(XmlNodeType type, string name)

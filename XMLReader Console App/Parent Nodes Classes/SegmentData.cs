@@ -19,7 +19,7 @@ namespace XMLReader_Console_App
     class SegmentData
     {
         #region Fields
-        private List<Segment> Segments;     // list of segments
+        public List<Segment> Segments;     // list of segments
         #endregion
 
         #region Constructors
@@ -101,10 +101,10 @@ namespace XMLReader_Console_App
         #endregion
 
         #region Segments data in lists of type
-        List<Sp> pts;
-        List<uint> start_links;
-        List<uint> end_links;
-        List<Seg> seg_overlap;
+        public List<Sp> pts;
+        public List<uint> start_links;
+        public List<uint> end_links;
+        public List<Seg> seg_overlap;
         #endregion
 
         #region Constructors
