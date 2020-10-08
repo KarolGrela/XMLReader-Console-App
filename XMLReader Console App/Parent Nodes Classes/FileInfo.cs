@@ -50,19 +50,19 @@ namespace XMLReader_Console_App
         {
             string DataString = ""; // initailize
 
-            DataString = "File Info:\n";
-            DataString += $"Version: {Version}\n";
-            DataString += $"Production area: {Production_area}\n";
-            DataString += $"Machine type: {Machine_type}\n";
-            DataString += $"Status: {Status}\n";
-            DataString += $"Timestamp: {Timestamp}\n";
-            DataString += $"SW: {SW1}\n";
-            DataString += $"User: {User}\n";
-            DataString += $"Environment version: {Environment_version}\n";
-            DataString += $"Machine type ID: {Machine_type_id}\n";
-            DataString += $"Custom prop 1 name: {Custom_prop_1_name}\n";
-            DataString += $"Custom prop 2 name: {Custom_prop_2_name}\n";
-            DataString += "/File Info";
+            DataString = "File Info\n";
+            DataString += $"    Version: {Version}\n";
+            DataString += $"    Production area: {Production_area}\n";
+            DataString += $"    Machine type: {Machine_type}\n";
+            DataString += $"    Status: {Status}\n";
+            DataString += $"    Timestamp: {Timestamp}\n";
+            DataString += $"    SW: {SW1}\n";
+            DataString += $"    User: {User}\n";
+            DataString += $"    Environment version: {Environment_version}\n";
+            DataString += $"    Machine type ID: {Machine_type_id}\n";
+            DataString += $"    Custom prop 1 name: {Custom_prop_1_name}\n";
+            DataString += $"    Custom prop 2 name: {Custom_prop_2_name}\n";
+            DataString += "/File Info\n";
 
             return DataString;
         }

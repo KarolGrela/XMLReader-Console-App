@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 
 namespace XMLReader_Console_App
@@ -14,12 +15,13 @@ namespace XMLReader_Console_App
 
     /// <summary>
     /// class containng List of Segments[class] and methods used to work on the list
-    /// and methods allowing for adding/accesing 
+    /// and methods allowing for adding/accesing them
     /// </summary>
     class SegmentData
     {
         #region Fields
-        public List<Segment> Segments;     // list of segments
+        public List<Segment> Segments;      // list of segments
+        private string dataString;          // string with read data
         #endregion
 
         #region Constructors
@@ -40,6 +42,8 @@ namespace XMLReader_Console_App
             s1 = segment;
             Segments.Add(segment);
         }
+        
+
         /// <summary>
         /// return length of list
         /// </summary>
@@ -48,6 +52,7 @@ namespace XMLReader_Console_App
         {
             return Segments.Count;
         }
+
         /// <summary>
         /// return copy of segment
         /// </summary>
@@ -57,6 +62,7 @@ namespace XMLReader_Console_App
         {
             return Segments[index];
         }
+
         /// <summary>
         /// function saving copy of list Class.Segments to parameter copy 
         /// </summary>
@@ -68,6 +74,79 @@ namespace XMLReader_Console_App
             {                
                 copy.Add(Segments[i]);                      
             }
+        }
+
+        /// <summary>
+        /// Fills string dataString with data
+        /// </summary>
+        /// <returns> dataString </returns>
+        public string DisplayData()
+        {
+            dataString = "";
+            dataString += $"Segment Data (contains {Segments.Count} segments)\n";
+            for (int i = 0; i < Segments.Count; i++)
+            {
+                // segment data
+                dataString += $"    Segment {i + 1}\n";
+
+                dataString += $"    id {Segments[i].Id}\n";
+                dataString += $"    status {Segments[i].Status}\n";
+                dataString += $"    level {Segments[i].Level}\n";
+                dataString += $"    wait_area {Segments[i].Wait_area}\n";
+                dataString += $"    pivot_start {Segments[i].Pivot_start}\n";
+                dataString += $"    pivot_end {Segments[i].Pivot_end}\n";
+
+                // pts
+                dataString += $"    pts (contains {Segments[i].pts.Count} sp)\n";
+                for (int j = 0; j < Segments[i].pts.Count; j++)
+                {
+                    dataString += $"    sp {j + 1}\n";
+
+                    dataString += $"        x {Segments[i].pts[j].X}\n";
+                    dataString += $"        y {Segments[i].pts[j].Y}\n";
+                    dataString += $"        s {Segments[i].pts[j].S}\n";
+                    dataString += $"        t {Segments[i].pts[j].T}\n";
+                    dataString += $"        actuator {Segments[i].pts[j].Actuator}\n";
+                    dataString += $"        strict_actuator {Segments[i].pts[j].Strict_actuator}\n";
+                    dataString += $"        p1 {Segments[i].pts[j].P1}\n";
+                    dataString += $"        p2 {Segments[i].pts[j].P2}\n";
+                    dataString += $"    /sp\n";
+                }
+                dataString += $"    /pts\n";
+
+                // start_links
+                dataString += $"    start_links (contains {Segments[i].start_links.Count} seg_id)\n";
+                for (int j = 0; j < Segments[i].start_links.Count; j++)
+                {
+                    dataString += $"        start_links {Segments[i].start_links[j]}\n";
+                }
+                dataString += $"    /start_links\n";
+
+                // end_links
+                dataString += $"    end_links (contains {Segments[i].end_links.Count} seg_id)\n";
+                for (int j = 0; j < Segments[i].end_links.Count; j++)
+                {
+                    dataString += $"        end_links {Segments[i].end_links[j]}\n";
+                }
+                dataString += $"    /end_links\n";
+
+                // seg_overlap
+                dataString += $"    Seg_overlap (contains {Segments[i].seg_overlap.Count} seg)\n";
+                for (int j = 0; j < Segments[i].seg_overlap.Count; j++)
+                {
+                    dataString += $"    seg {j + 1}\n";
+                    dataString += $"        machine_type_id {Segments[i].seg_overlap[j].Machine_type_id}\n";
+                    dataString += $"        id {Segments[i].seg_overlap[j].Id}\n";
+                    dataString += $"        overlap_modes {Segments[i].seg_overlap[j].Overlap_modes}\n";
+                    dataString += $"    /seg\n";
+                }
+                dataString += $"    /seg_overlap\n";
+
+                dataString += $"    /Segment\n\n";
+            }
+            dataString += "/Segment Data";
+
+            return dataString;
         }
         #endregion 
 
@@ -102,8 +181,8 @@ namespace XMLReader_Console_App
 
         #region Segments data in lists of type
         public List<Sp> pts;
-        public List<uint> start_links;
-        public List<uint> end_links;
+        public List<string> start_links;
+        public List<string> end_links;
         public List<Seg> seg_overlap;
         #endregion
 
@@ -111,16 +190,13 @@ namespace XMLReader_Console_App
         public Segment()
         {
             pts = new List<Sp>();
-            start_links = new List<uint>();
-            end_links = new List<uint>();
+            start_links = new List<string>();
+            end_links = new List<string>();
             seg_overlap = new List<Seg>();
         }
         #endregion
 
-        #region
-        #endregion
-
-        //TODO: pts, start_links, end_links, seg_overlap
+       
 
     }
 

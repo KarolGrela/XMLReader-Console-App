@@ -6,6 +6,7 @@ using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
 using XMLReader_Console_App.Parent_Nodes_Classes;
+using System.Data.SqlTypes;
 
 namespace XMLReader_Console_App
 {
@@ -20,15 +21,6 @@ namespace XMLReader_Console_App
         private bool b_symbolic_points;
         private bool b_symbolic_point_groups;
         private bool b_zones;
-
-        /* setters/getters, not used
-        public bool bIn_file_info { get => b_in_file_info; set => b_in_file_info = value; }
-        public bool bSegment_data { get => b_segment_data; set => b_segment_data = value; }
-        public bool bPosinit_points { get => b_posinit_points; set => b_posinit_points = value; }
-        public bool bSymbolic_points { get => b_symbolic_points; set => b_symbolic_points = value; }
-        public bool bSymbolic_point_groups { get => b_symbolic_point_groups; set => b_symbolic_point_groups = value; }
-        public bool bZones { get => b_zones; set => b_zones = value; }
-        */
 
         #endregion
 
@@ -45,6 +37,9 @@ namespace XMLReader_Console_App
         public SymbolicPointGroups symbolicPointGroups;
         public SymbolicPoints symbolicPoints;
         public Zones zones;
+
+        // string with read data
+        public string dataString;
 
         #endregion
 
@@ -75,7 +70,7 @@ namespace XMLReader_Console_App
     }
         #endregion
 
-        #region Methods
+        #region Public Methods
         /// <summary>
         /// Main method
         /// </summary>
@@ -126,6 +121,18 @@ namespace XMLReader_Console_App
             return true;
         }
 
+        public string metCreateDataString()
+        {
+            dataString = "";
+            dataString += fileInfo.DisplayData();
+            dataString += segmentData.DisplayData();
+            return dataString;
+        }
+
+        #endregion
+
+        #region Private Methods
+
         /// <summary>
         /// Switching logic of boolean fields
         /// </summary>
@@ -166,7 +173,6 @@ namespace XMLReader_Console_App
            
         }
 
-        #region Methods reading sections of files
         // reads file_info section
         // every cycle of this loop reads one line from XML
         private void metFileInfo(XmlNodeType type, string name)             
@@ -242,6 +248,9 @@ namespace XMLReader_Console_App
                     seg_overlap = false;
                 }
 
+                //Console.WriteLine($"{segment_data} {pts} {start_links} {end_links} {seg_overlap} {xmlFile.NodeType } {xmlFile.Name}");
+
+
                 // Saving data to the structure
                 if (segment_data)
                 {
@@ -252,46 +261,94 @@ namespace XMLReader_Console_App
                     if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "wait_area") s1.Wait_area = xmlFile.ReadElementContentAsString();
                     if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "pivot_start") s1.Pivot_start = xmlFile.ReadElementContentAsString();
                     if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "pivot_end") s1.Pivot_end = xmlFile.ReadElementContentAsString();
-                }               
-                else if (pts)
+                }
+               
+                // saving instances of class sp to list called pts
+                if(pts)
                 {
-                    Sp sp = new Sp();   // variable storing data from currently read Sp
-
-                    bool run_while = true;      // variable stopping while loop 
-
-                    // loop reading one sp
-                    while (run_while)
+                    if(xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "sp")
                     {
-                        xmlFile.Read();
-                        if (xmlFile.NodeType == XmlNodeType.Element)
+                        Sp sp = new Sp();
+                        while(xmlFile.Read())
                         {
                             // reading data
-                            if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "x") { sp.X = xmlFile.ReadElementContentAsString(); } //sp.X = xmlFile.ReadElementContentAsString();
-                            if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "y") { } //sp.Y = xmlFile.ReadElementContentAsString();
-                            if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "s") { } //sp.S = xmlFile.ReadElementContentAsString();
-                            if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "t") { } //sp.T = xmlFile.ReadElementContentAsString();
-                            if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "actuator") { } //sp.Actuator = xmlFile.ReadElementContentAsString();
-                            if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "strict_actuator") { } //sp.Strict_actuator = xmlFile.ReadElementContentAsString();
-                            if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "p1") { } //sp.P1 = xmlFile.ReadElementContentAsString();
-                            if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "p2") { } //sp.P2 = xmlFile.ReadElementContentAsString();
+                            if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "x") { sp.X = xmlFile.ReadElementContentAsString(); }
+                            if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "y") { sp.Y = xmlFile.ReadElementContentAsString(); }
+                            if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "s") { sp.S = xmlFile.ReadElementContentAsString(); }
+                            if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "t") { sp.T = xmlFile.ReadElementContentAsString(); }
+                            if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "actuator") { sp.Actuator = xmlFile.ReadElementContentAsString(); }
+                            if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "strict_actuator") { sp.Strict_actuator = xmlFile.ReadElementContentAsString(); }
+                            if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "p1") { sp.P1 = xmlFile.ReadElementContentAsString(); }
+                            if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "p2") { sp.P2 = xmlFile.ReadElementContentAsString(); }
+
+                            // adding sp instance to the list and breaking the loop
+                            if (xmlFile.NodeType == XmlNodeType.EndElement && xmlFile.Name == "sp")
+                            {
+                                s1.pts.Add(sp);
+                                break;
+                            }
                         }
-                        // adding sp to the list and breaking the loop up -> sp finished
-                        
+                    }
+                }
 
-                        //Console.WriteLine(xmlFile.NodeType + ", " + xmlFile.Name);
+                // add seg_ids to list start_links
+                if(start_links)
+                {
+                    if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "start_links")
+                    {
+                        while (xmlFile.Read())
+                        {
+                            if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "seg_id")    s1.start_links.Add(xmlFile.ReadElementContentAsString()); // add element to list
+                            if (xmlFile.NodeType == XmlNodeType.EndElement && xmlFile.Name == "start_links")
+                            {
+                                break;
+                            }
+                        }
+                    }
+                }
 
-                        if (xmlFile.NodeType == XmlNodeType.EndElement && xmlFile.Name == "segment") 
-                        { 
-                            s1.pts.Add(sp);
-                            run_while = false; 
+                // add seg_ids to list end_links
+                if (end_links)
+                {
+                    if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "end_links")
+                    {
+                        while (xmlFile.Read())
+                        {
+                            if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "seg_id")    s1.end_links.Add(xmlFile.ReadElementContentAsString()); // add element to list
+                            if (xmlFile.NodeType == XmlNodeType.EndElement && xmlFile.Name == "end_links")
+                            {
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                
+                if (seg_overlap)
+                {
+                    if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "seg")
+                    {
+                        Seg seg = new Seg();
+                        while (xmlFile.Read())
+                        {
+                            if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "machine_type_id")   seg.Machine_type_id = xmlFile.ReadElementContentAsString();
+                            if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "id")                seg.Id = xmlFile.ReadElementContentAsString();
+                            if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "overlap_modes")     seg.Overlap_modes = xmlFile.ReadElementContentAsString();
+
+                            if (xmlFile.NodeType == XmlNodeType.EndElement && xmlFile.Name == "seg")
+                            {
+                                s1.seg_overlap.Add(seg);
+                                break;
+                            }
                         }
                     }
                 }
                 
+
                 // adding segment to the list and breaking the loop up -> segment finished
                 if (xmlFile.NodeType == XmlNodeType.EndElement && xmlFile.Name == "segment") 
                 {
-                    Console.WriteLine("Break dem loops");
+                    // Console.WriteLine("Break dem loops");
                     segmentData.AddSegment(s1); 
                     break;
                 }
@@ -318,7 +375,7 @@ namespace XMLReader_Console_App
             // do nothing
         }
 
-        #endregion
+
 
         #endregion
 
