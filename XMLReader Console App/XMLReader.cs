@@ -15,6 +15,10 @@ namespace XMLReader_Console_App
 
         #region Boolean fields
 
+        /// <summary>
+        /// Memory fields, allowing program to remember which part of file is being read
+        /// </summary>
+
         private bool b_file_info;
         private bool b_segment_data;
         private bool b_posinit_points;
@@ -76,7 +80,7 @@ namespace XMLReader_Console_App
         /// </summary>
         /// <param name="path">  </param>
         /// <returns> true if function finished succesfully, false if excepction occured </returns>
-        public bool XMLReader_Workflow()
+        public bool ReadFile()
         {
             // Reading XML file
             while (xmlFile.Read()) {
@@ -84,10 +88,11 @@ namespace XMLReader_Console_App
                 // setting/resetting boolean state bits
                 SwitchBooleans(xmlFile.NodeType, xmlFile.Name);     
 
-                // calling functions reading
+                // calling functions reading xml file
                 if(!(b_file_info || b_segment_data || b_posinit_points || b_symbolic_points || b_symbolic_point_groups || b_zones))
                 {
                     // do nothing
+                    // not necessary
                 }
                 else if(b_file_info)
                 {
@@ -149,10 +154,10 @@ namespace XMLReader_Console_App
 
             if (type == XmlNodeType.Element && name == "file_info")                                     b_file_info = true;                  // set if node is of type Element and has proper name node 
             if (type == XmlNodeType.Element && name == "segment_data" && b_file_info)                   b_segment_data = true;                  // set if node is of type Element and has proper name node and previous section is true
-            if (type == XmlNodeType.Element && name == "posinit_points" && b_segment_data)              b_posinit_points = true;                // set if node is of type Element and has proper name node and previous section is true
+            if (name == "posinit_points" && b_segment_data)              b_posinit_points = true;                // set if node is of type Element and has proper name node and previous section is true
             if (type == XmlNodeType.Element && name == "symbolic_points" && b_posinit_points)           b_symbolic_points = true;               // set if node is of type Element and has proper name node and previous section is true
-            if (type == XmlNodeType.Element && name == "symbolic_point_groups" && b_symbolic_points)    b_symbolic_point_groups = true;         // set if node is of type Element and has proper name node and previous section is true
-            if (type == XmlNodeType.Element && name == "zones" && b_symbolic_point_groups)              b_zones = true;                         // set if node is of type Element and has proper name node and previous section is true
+            if (name == "symbolic_point_groups" && b_symbolic_points)    b_symbolic_point_groups = true;         // set if node is of type Element and has proper name node and previous section is true
+            if (name == "zones" && b_symbolic_point_groups)              b_zones = true;                         // set if node is of type Element and has proper name node and previous section is true
 
             #endregion
 
@@ -168,7 +173,7 @@ namespace XMLReader_Console_App
 
             #endregion
 
-           // Console.WriteLine($"{type}, {name}");
+            //Console.WriteLine($"{type}, {name}");
             //Console.WriteLine($"{b_file_info}    {b_segment_data}    {b_posinit_points}      {b_symbolic_points}      {b_symbolic_point_groups}     {b_zones}");
            
         }
@@ -205,13 +210,13 @@ namespace XMLReader_Console_App
              * 3. start_links - list of strings
              * 4. end_links - list of strings
              * 5. seg_overlap - list of instances of seg class
-             * In order for loop to function correctly boolean variables, determining type of currently read data, are needed:
+             * In order for loop to function correctly boolean variables, determining type of currently read data, auxiliary variables are needed:
              */
-            bool segment_data = false;      // currently reading segment_data etc.
-            bool pts = false;
-            bool start_links = false;
-            bool end_links = false;
-            bool seg_overlap = false;
+            bool b_segment_data = false;      // currently reading segment_data etc.
+            bool b_pts = false;
+            bool b_start_links = false;
+            bool b_end_links = false;
+            bool b_seg_overlap = false;
 
             
 
@@ -219,40 +224,40 @@ namespace XMLReader_Console_App
             while (xmlFile.Read())
             {
                 // setting/resetting of boolean variables
-                if (((pts || start_links || end_links || seg_overlap) == false) && xmlFile.Name == "id")  // set segment_data
+                if (((b_pts || b_start_links || b_end_links || b_seg_overlap) == false) && xmlFile.Name == "id")  // set segment_data
                 {
-                    segment_data = true;
+                    b_segment_data = true;
                 }
-                else if (segment_data && xmlFile.Name == "pts")                                              // reset segment data / set pts
+                else if (b_segment_data && xmlFile.Name == "pts")                                              // reset segment data / set pts
                 {
-                    segment_data = false;
-                    pts = true;
+                    b_segment_data = false;
+                    b_pts = true;
                 }
-                else if (pts && xmlFile.Name == "start_links")                                               // reset pts / set start_links
+                else if (b_pts && xmlFile.Name == "start_links")                                               // reset pts / set start_links
                 {
-                    pts = false;
-                    start_links = true;
+                    b_pts = false;
+                    b_start_links = true;
                 }
-                else if (start_links && xmlFile.Name == "end_links")                                         // reset start_links / set end_links
+                else if (b_start_links && xmlFile.Name == "end_links")                                         // reset start_links / set end_links
                 {
-                    start_links = false;
-                    end_links = true;
+                    b_start_links = false;
+                    b_end_links = true;
                 }
-                else if (end_links && xmlFile.Name == "seg_overlap")                                         // reset end_links / set seg_overlap
+                else if (b_end_links && xmlFile.Name == "seg_overlap")                                         // reset end_links / set seg_overlap
                 {
-                    end_links = false;
-                    seg_overlap = true;
+                    b_end_links = false;
+                    b_seg_overlap = true;
                 }
-                else if (seg_overlap && xmlFile.NodeType == XmlNodeType.EndElement && xmlFile.Name == "seg_overlap")     // reset seg_overlap
+                else if (b_seg_overlap && xmlFile.NodeType == XmlNodeType.EndElement && xmlFile.Name == "seg_overlap")     // reset seg_overlap
                 {
-                    seg_overlap = false;
+                    b_seg_overlap = false;
                 }
 
                 //Console.WriteLine($"{segment_data} {pts} {start_links} {end_links} {seg_overlap} {xmlFile.NodeType } {xmlFile.Name}");
 
 
                 // Saving data to the structure
-                if (segment_data)
+                if (b_segment_data)
                 {
                     // reading data
                     if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "id") s1.Id = xmlFile.ReadElementContentAsString();
@@ -264,12 +269,14 @@ namespace XMLReader_Console_App
                 }
                
                 // saving instances of class sp to list called pts
-                if(pts)
+                if(b_pts)
                 {
-                    if(xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "sp")
+                    // next xmlFile.Name should be equal to "x" 
+                    // it is crucial to start and finish reading data in this loop on proper lines
+                    if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "sp")     
                     {
-                        Sp sp = new Sp();
-                        while(xmlFile.Read())
+                        Sp sp = new Sp();       // create instance of Sp class, filled in the following loop
+                        while(xmlFile.Read())   // read data in one sp
                         {
                             // reading data
                             if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "x") { sp.X = xmlFile.ReadElementContentAsString(); }
@@ -291,15 +298,18 @@ namespace XMLReader_Console_App
                     }
                 }
 
-                // add seg_ids to list start_links
-                if(start_links)
+                // fill list of string start_links with string seg_id
+                if(b_start_links)
                 {
+                    // next xmlFile.Name should be equal to "seg_id" 
+                    // it is crucial to start and finish reading data in this loop on proper lines
                     if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "start_links")
                     {
+                        // loop reads all seg_id in start_links section
                         while (xmlFile.Read())
                         {
-                            if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "seg_id")    s1.start_links.Add(xmlFile.ReadElementContentAsString()); // add element to list
-                            if (xmlFile.NodeType == XmlNodeType.EndElement && xmlFile.Name == "start_links")
+                            if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "seg_id")    s1.start_links.Add(xmlFile.ReadElementContentAsString()); // read and add element to list
+                            if (xmlFile.NodeType == XmlNodeType.EndElement && xmlFile.Name == "start_links")    // break the loop;
                             {
                                 break;
                             }
@@ -307,15 +317,19 @@ namespace XMLReader_Console_App
                     }
                 }
 
-                // add seg_ids to list end_links
-                if (end_links)
+                // fill list of string end_links with string seg_id
+                if (b_end_links)
                 {
+                    // next xmlFile.Name should be equal to "seg_id" 
+                    // it is crucial to start and finish reading data in this loop on proper lines
                     if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "end_links")
                     {
+                        // loop reads all seg_id in end_links section
                         while (xmlFile.Read())
                         {
-                            if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "seg_id")    s1.end_links.Add(xmlFile.ReadElementContentAsString()); // add element to list
-                            if (xmlFile.NodeType == XmlNodeType.EndElement && xmlFile.Name == "end_links")
+                            if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "seg_id")    s1.end_links.Add(xmlFile.ReadElementContentAsString()); // read and add element to list
+                            
+                            if (xmlFile.NodeType == XmlNodeType.EndElement && xmlFile.Name == "end_links")  // break the loop;
                             {
                                 break;
                             }
@@ -323,18 +337,23 @@ namespace XMLReader_Console_App
                     }
                 }
 
-                
-                if (seg_overlap)
+                // add one seg to list seg_overlap
+                if (b_seg_overlap)
                 {
+                    // next xmlFile.Name should be equal to "machine_type_id" 
+                    // it is crucial to start and finish reading data in this loop on proper lines
                     if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "seg")
                     {
-                        Seg seg = new Seg();
+                        Seg seg = new Seg();    // create new instance of Seg class, filled in the following loop
+                        // loop filling one Seg instance
                         while (xmlFile.Read())
                         {
+                            // read and save data
                             if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "machine_type_id")   seg.Machine_type_id = xmlFile.ReadElementContentAsString();
                             if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "id")                seg.Id = xmlFile.ReadElementContentAsString();
                             if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "overlap_modes")     seg.Overlap_modes = xmlFile.ReadElementContentAsString();
 
+                            // save seg to Segment and break loop
                             if (xmlFile.NodeType == XmlNodeType.EndElement && xmlFile.Name == "seg")
                             {
                                 s1.seg_overlap.Add(seg);
@@ -348,7 +367,6 @@ namespace XMLReader_Console_App
                 // adding segment to the list and breaking the loop up -> segment finished
                 if (xmlFile.NodeType == XmlNodeType.EndElement && xmlFile.Name == "segment") 
                 {
-                    // Console.WriteLine("Break dem loops");
                     segmentData.AddSegment(s1); 
                     break;
                 }
@@ -358,21 +376,69 @@ namespace XMLReader_Console_App
         private void metPosinit_point(XmlNodeType type, string name)
         {
             // do nothing
+            // we don't know what types of data are saved into this part of XML file
         }
 
+        // reads symbolic_points section
+        // every call of this method reads one symbolic_point
         private void metSymbolic_points(XmlNodeType type, string name)
         {
+            SymbolicPoint symbolicPoint = new SymbolicPoint();
+            // read data unbounded by structures
+            if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "symbolic_point")
+            {
+                while (xmlFile.Read())  // loop reading string data
+                {
+                    // read and save data
+                    if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "icon_type") { symbolicPoint.Icon_type = xmlFile.ReadElementContentAsString(); }
+                    else if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "name") { symbolicPoint.Name = xmlFile.ReadElementContentAsString(); }
+                    else if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "id") { symbolicPoint.Id = xmlFile.ReadElementContentAsString(); }
+                    else if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "x") { symbolicPoint.X = xmlFile.ReadElementContentAsString(); }
+                    else if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "y") { symbolicPoint.Y = xmlFile.ReadElementContentAsString(); }
+                    else if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "h") { symbolicPoint.H = xmlFile.ReadElementContentAsString(); }
+                    else if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "level") { symbolicPoint.Level = xmlFile.ReadElementContentAsString(); }
+                    else if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "opposite_h") { symbolicPoint.Opposite_h = xmlFile.ReadElementContentAsString(); }
+                    else if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "drawx") { symbolicPoint.Drawx = xmlFile.ReadElementContentAsString(); }
+                    else if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "drawy") { symbolicPoint.Drawy = xmlFile.ReadElementContentAsString(); }
+                    else if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "decision_data") { symbolicPoint.Decision_data = xmlFile.ReadElementContentAsString(); }
+                    else if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "stop") { symbolicPoint.Stop = xmlFile.ReadElementContentAsString(); }
+                    else if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "symboltype") { symbolicPoint.Symboltype = xmlFile.ReadElementContentAsString(); }
+
+                    //break loop
+                    if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "seg") { break; }
+                }
+            }
+
+            // read data from one seg
+            if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "seg") 
+            {
+                SymP_Seg seg = new SymP_Seg();
+                while (xmlFile.Read())
+                {
+                    // save data to seg
+                    if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "machine_type_id")   { seg.Machine_type_id = xmlFile.ReadElementContentAsString(); }
+                    else if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "id")           { seg.Id = xmlFile.ReadElementContentAsString(); }
+                    else if (xmlFile.NodeType == XmlNodeType.Element && xmlFile.Name == "point_index")  { seg.Point_index = xmlFile.ReadElementContentAsString(); }
+
+                    // save data to list and break loop
+                    if (xmlFile.NodeType == XmlNodeType.EndElement && xmlFile.Name == "seg") { symbolicPoint.segment_links.Add(seg); break; }
+                }
+            }
+
+            symbolicPoints.symbolic_points_list.Add(symbolicPoint); //symbolicPoint;
 
         }
 
         private void metSymbolic_point_groups(XmlNodeType type, string name)
         {
             // do nothing
+            // we don't know what types of data are saved into this part of XML file
         }
 
         private void metZones(XmlNodeType type, string name)
         {
             // do nothing
+            // we don't know what types of data are saved into this part of XML file
         }
 
 

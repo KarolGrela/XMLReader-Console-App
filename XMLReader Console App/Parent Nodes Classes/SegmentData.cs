@@ -195,9 +195,6 @@ namespace XMLReader_Console_App
             seg_overlap = new List<Seg>();
         }
         #endregion
-
-       
-
     }
 
     /// <summary>

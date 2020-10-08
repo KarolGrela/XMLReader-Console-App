@@ -9,21 +9,18 @@ namespace XMLReader_Console_App
     /// </summary>
     class SymbolicPoints
     {
-        List<SymbolicPoint> symbolic_points;     
+        public List<SymbolicPoint> symbolic_points_list;     
 
         public SymbolicPoints()
         {
-            symbolic_points = new List<SymbolicPoint>();
+            symbolic_points_list = new List<SymbolicPoint>();
         }
     }
 
     /// <summary>
-    /// Symbolic point data consists of:
-    ///     its own data saved in strings
-    ///     instances of classes:
-    ///         holdrules
-    ///         resources
-    ///     list segment links (list<seg>)
+    /// Symbolic point class has different structure, depending from type of symbolic point
+    /// We've assumed all symbolic points are Hold
+    /// If other types are to be used in the future, modifications will be required
     /// </summary>
     class SymbolicPoint
     {
@@ -39,12 +36,9 @@ namespace XMLReader_Console_App
         private string drawx;
         private string drawy;
         private string decision_data;
-        private string load;
-        private string unload;
-        private string hold;
+        private string stop;
         private string symboltype;
-        private string occupancy_area;          // not used, don't know the datatype
-        private string allowed_destination;     // not used, don't know the datatype
+
 
         public string Icon_type { get => icon_type; set => icon_type = value; }
         public string Name { get => name; set => name = value; }
@@ -57,50 +51,32 @@ namespace XMLReader_Console_App
         public string Drawx { get => drawx; set => drawx = value; }
         public string Drawy { get => drawy; set => drawy = value; }
         public string Decision_data { get => decision_data; set => decision_data = value; }
-        public string Load { get => load; set => load = value; }
-        public string Unload { get => unload; set => unload = value; }
-        public string Hold { get => hold; set => hold = value; }
+        public string Stop { get => stop; set => stop = value; }
         public string Symboltype { get => symboltype; set => symboltype = value; }
+
+        #endregion
+
+        #region Unknown Datatypes
+
+        private string occupancy_area;          // not used, don't know the datatype
+        private string allowed_destination;     // not used, don't know the datatype
+
         public string Occupancy_area { get => occupancy_area; set => occupancy_area = value; }
+        public string Allowed_destination { get => allowed_destination; set => allowed_destination = value; }
+
         #endregion
 
         #region Data [classes and lists]
-        Holdrules holdrules;
-        List<Seg> segment_links;
-        Resources resources;
+        public List<SymP_Seg> segment_links;
+        public Resources resources;
         #endregion
 
         #region Constructor
         public SymbolicPoint()
         {
-            holdrules = new Holdrules();
-            segment_links = new List<Seg>();
+            segment_links = new List<SymP_Seg>();
             resources = new Resources();
         }
-        #endregion
-    }
-
-    /// <summary>
-    /// Class storing string data
-    /// </summary>
-    class Holdrules
-    {
-        #region Data [string]
-        private string btn_default;
-        private string btn_alt1;
-        private string mes;
-        private string dest_default;
-        private string dest_default_id;
-        private string dest_alt1;
-        private string dest_alt1_id;
-
-        public string Btn_default { get => btn_default; set => btn_default = value; }
-        public string Btn_alt1 { get => btn_alt1; set => btn_alt1 = value; }
-        public string Mes { get => mes; set => mes = value; }
-        public string Dest_default { get => dest_default; set => dest_default = value; }
-        public string Dest_default_id { get => dest_default_id; set => dest_default_id = value; }
-        public string Dest_alt1 { get => dest_alt1; set => dest_alt1 = value; }
-        public string Dest_alt1_id { get => dest_alt1_id; set => dest_alt1_id = value; }
         #endregion
     }
 
@@ -118,19 +94,14 @@ namespace XMLReader_Console_App
         #endregion
     }
 
-    /// <summary>
-    /// Lacking knowledge of following datatypes:
-    /// </summary>
-    class OccupancyArea
+    class SymP_Seg
     {
+        private string machine_type_id;
+        private string id;
+        private string point_index;
 
+        public string Machine_type_id { get => machine_type_id; set => machine_type_id = value; }
+        public string Id { get => id; set => id = value; }
+        public string Point_index { get => point_index; set => point_index = value; }
     }
-    /// <summary>
-    /// Lacking knowledge of following datatypes:
-    /// </summary>
-    class AllowedDestination
-    {
-
-    }
-
 }
