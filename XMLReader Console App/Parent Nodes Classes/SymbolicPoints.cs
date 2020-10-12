@@ -15,6 +15,47 @@ namespace XMLReader_Console_App
         {
             symbolic_points_list = new List<SymbolicPoint>();
         }
+
+        // prepare string of data to display 
+        public string DisplayData()
+        {
+            string DataString = ""; // initailize
+
+            DataString = $"Symbolic Points: {symbolic_points_list.Count}\n";
+
+            // each for is one symbolic point from the list
+            for (int i = 0; i < symbolic_points_list.Count; i++)
+            {
+                DataString += $"    Symbolic Point {i + 1}\n";
+                DataString += $"        icon type {symbolic_points_list[i].Icon_type}\n";
+                DataString += $"        name {symbolic_points_list[i].Name}\n";
+                DataString += $"        id {symbolic_points_list[i].Id}\n";
+                DataString += $"        x {symbolic_points_list[i].X}\n";
+                DataString += $"        y {symbolic_points_list[i].Y}\n";
+                DataString += $"        h {symbolic_points_list[i].H}\n";
+                DataString += $"        level {symbolic_points_list[i].Level}\n";
+                DataString += $"        opposite h {symbolic_points_list[i].Opposite_h}\n";
+                DataString += $"        drawX {symbolic_points_list[i].Drawx}\n";
+                DataString += $"        drawY {symbolic_points_list[i].Drawy}\n";
+                DataString += $"        decision data {symbolic_points_list[i].Decision_data}\n";
+                DataString += $"        stop {symbolic_points_list[i].Stop}\n";
+                DataString += $"        symboltype {symbolic_points_list[i].Symboltype}\n";
+
+                DataString += $"    Segment links {symbolic_points_list[i].segment_links.Count}\n";
+                for (int j = 0; j < symbolic_points_list[i].segment_links.Count; j++)
+                {
+                    DataString += $"        seg {j + 1}\n";
+                    DataString += $"            machine type id {symbolic_points_list[i].segment_links[j].Machine_type_id}\n";
+                    DataString += $"            machine type id {symbolic_points_list[i].segment_links[j].Id}\n";
+                    DataString += $"            machine type id {symbolic_points_list[i].segment_links[j].Point_index}\n";
+                }
+                
+            }
+
+            DataString += "/Symbolic Points\n";
+
+            return DataString;
+        }
     }
 
     /// <summary>

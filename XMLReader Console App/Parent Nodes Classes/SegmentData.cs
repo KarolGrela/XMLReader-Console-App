@@ -20,8 +20,7 @@ namespace XMLReader_Console_App
     class SegmentData
     {
         #region Fields
-        public List<Segment> Segments;      // list of segments
-        private string dataString;          // string with read data
+        public List<Segment> Segments;      // list of segments       
         #endregion
 
         #region Constructors
@@ -82,7 +81,7 @@ namespace XMLReader_Console_App
         /// <returns> dataString </returns>
         public string DisplayData()
         {
-            dataString = "";
+            string dataString = "";
             dataString += $"Segment Data (contains {Segments.Count} segments)\n";
             for (int i = 0; i < Segments.Count; i++)
             {
